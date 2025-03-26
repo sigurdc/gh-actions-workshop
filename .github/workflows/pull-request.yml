@@ -1,0 +1,66 @@
+name: Hello world action
+
+on:
+    - pull_request
+
+jobs:
+    hello_world_job:
+        name: Hello world job
+        runs-on: ubuntu-latest
+        steps:
+            - name: Print message to terminal
+              run: echo "Hello!"
+
+    build:
+        name: Build
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+            
+            - name: Install dependencies
+              run: npm ci
+            
+            - name: Build
+              run: npm run build
+
+    run_tests:
+        name: Run tests
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+          
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Run tests
+              run: npm run test
+
+    run_checks:
+        name: Run checks
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+          
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Run checks
+              run: npm run lint:check
+
+
+    post_comment:
+        name: Post comment
+        runs-on: ubuntu-latest
+        permissions:
+            pull-requests: write
+        needs: [build, run_tests]
+        steps:
+            - name: Post comment
+              uses: peter-evans/create-or-update-comment@v4
+              with:
+                issue-number: ${{github.event.pull_request.number}}
+                body: |
+                    All jobs have finished!
